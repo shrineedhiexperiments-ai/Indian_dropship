@@ -1,0 +1,53 @@
+{
+  "projectSettings": {
+    "framework": "nextjs",
+    "nodeVersion": "20.x"
+  },
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "env": [
+    {
+      "key": "DATABASE_URL",
+      "description": "PostgreSQL connection string from Neon"
+    },
+    {
+      "key": "SESSION_SECRET",
+      "description": "32+ character random string for session encryption"
+    },
+    {
+      "key": "ADMIN_EMAIL",
+      "description": "Email of the admin user"
+    },
+    {
+      "key": "APP_URL",
+      "description": "Your Vercel deployment URL"
+    },
+    {
+      "key": "STRIPE_SECRET_KEY",
+      "description": "Stripe API secret key (optional)"
+    },
+    {
+      "key": "STRIPE_WEBHOOK_SECRET",
+      "description": "Stripe webhook signing secret (optional)"
+    },
+    {
+      "key": "RESEND_API_KEY",
+      "description": "Resend API key for email (optional)"
+    },
+    {
+      "key": "EMAIL_FROM",
+      "description": "Email sender address (optional)"
+    },
+    {
+      "key": "SHIPPING_FLAT_CHF",
+      "description": "Flat shipping cost in CHF"
+    },
+    {
+      "key": "FREE_SHIPPING_OVER_CHF",
+      "description": "Free shipping threshold in CHF"
+    }
+  ],
+  "crons": []
+}
