@@ -1,8 +1,9 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
+import { createHash, randomBytes } from 'crypto';
 import { db } from '@/lib/db';
-import { requireUser, hashPassword, createSession } from '@/lib/auth';
+import { requireUser, hashPassword, verifyPassword, createSession } from '@/lib/auth';
 import { mail } from '@/lib/email';
 import type { FormState } from './auth';
 
@@ -48,7 +49,6 @@ export async function changePassword(_: FormState, fd: FormData): Promise<FormSt
   const dbUser = await db.user.findUnique({ where: { id: user.id } });
   if (!dbUser) return { error: 'User not found' };
 
-  const { verifyPassword } = await import('@/lib/auth');
   const isValid = await verifyPassword(parsed.data.currentPassword, dbUser.passwordHash);
   if (!isValid) return { error: 'Current password is incorrect' };
 
@@ -102,9 +102,8 @@ export async function requestPasswordReset(_: FormState, fd: FormData): Promise<
   if (!user) return { error: undefined };
 
   // Generate reset token
-  const { randomBytes } = await import('crypto');
   const token = randomBytes(32).toString('hex');
-  const tokenHash = (await import('crypto')).createHash('sha256').update(token).digest('hex');
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
   await db.passwordReset.create({
@@ -143,7 +142,6 @@ export async function resetPassword(_: FormState, fd: FormData): Promise<FormSta
   const parsed = resetPasswordSchema.safeParse(Object.fromEntries(fd));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-  const { createHash } = await import('crypto');
   const tokenHash = createHash('sha256').update(parsed.data.token).digest('hex');
 
   const reset = await db.passwordReset.findUnique({
