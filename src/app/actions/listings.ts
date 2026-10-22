@@ -117,15 +117,7 @@ export async function sendMessage(_: FormState, fd: FormData): Promise<FormState
   });
 
   // Notify recipient (don't send full message text for privacy)
-  await mail.send({
-    to: toUser.email,
-    subject: `New message about "${listing.title}"`,
-    html: `
-      <p>Hi ${toUser.name},</p>
-      <p>${user.name} sent you a message about the listing "${listing.title}".</p>
-      <p><a href="${process.env.APP_URL}/messages?listing=${listing.id}">View message</a></p>
-    `,
-  });
+  await mail.newMessage(toUser.email, user.name, listing.title, listing.id);
 
   revalidatePath(`/messages?listing=${listing.id}`);
   return { error: undefined };

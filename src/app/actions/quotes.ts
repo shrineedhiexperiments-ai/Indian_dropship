@@ -34,20 +34,7 @@ export async function createQuote(_: FormState, fd: FormData): Promise<FormState
   });
 
   // Notify admin
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (adminEmail) {
-    await mail.send({
-      to: adminEmail,
-      subject: `New quote request from ${user.name}`,
-      html: `
-        <p>New quote request from ${user.name} (${user.email})</p>
-        <p><strong>Product:</strong> ${parsed.data.description}</p>
-        <p><strong>Quantity:</strong> ${parsed.data.qty}</p>
-        <p><strong>URL:</strong> <a href="${parsed.data.url}">${parsed.data.url}</a></p>
-        <p><a href="${process.env.APP_URL}/admin/quotes/${quote.id}">View in admin</a></p>
-      `,
-    });
-  }
+  await mail.quoteRequested(parsed.data.url, user.name);
 
   revalidatePath('/quotes');
   return { error: undefined };
@@ -76,17 +63,7 @@ export async function respondToQuote(_: FormState, fd: FormData): Promise<FormSt
   });
 
   // Notify user
-  await mail.send({
-    to: quote.user.email,
-    subject: 'Your product quote is ready',
-    html: `
-      <p>Hi ${quote.user.name},</p>
-      <p>We have a quote for your product request:</p>
-      <p><strong>Total Price:</strong> CHF ${chf(quotedRappen)}</p>
-      ${parsed.data.adminNote ? `<p><strong>Note:</strong> ${parsed.data.adminNote}</p>` : ''}
-      <p><a href="${process.env.APP_URL}/quotes/${quote.id}">View and accept/decline</a></p>
-    `,
-  });
+  await mail.quoteReady(quote.user.email, chf(quotedRappen));
 
   revalidatePath('/admin/quotes');
   return { error: undefined };
@@ -105,14 +82,7 @@ export async function acceptQuote(quoteId: string): Promise<FormState> {
   });
 
   // Notify admin
-  const adminEmail = process.env.ADMIN_EMAIL;
-  if (adminEmail) {
-    await mail.send({
-      to: adminEmail,
-      subject: `Quote ${quoteId} accepted by ${user.name}`,
-      html: `<p>${user.name} (${user.email}) has accepted the quote for CHF ${quote.quotedRappen ? chf(quote.quotedRappen) : 'N/A'}.</p>`,
-    });
-  }
+  await mail.quoteResponded(true, user.name);
 
   revalidatePath('/quotes');
   return { error: undefined };

@@ -63,15 +63,7 @@ export async function changePassword(_: FormState, fd: FormData): Promise<FormSt
 
   // Sign out all other sessions by updating passwordChangedAt
   // Next login will require re-authentication
-  await mail.send({
-    to: user.email,
-    subject: 'Your password has been changed',
-    html: `
-      <p>Hi ${user.name},</p>
-      <p>Your password was successfully changed. If you did not make this change, please contact support immediately.</p>
-      <p>For security reasons, you may need to log in again.</p>
-    `,
-  });
+  await mail.passwordChanged(user.email);
 
   return { error: undefined };
 }
@@ -114,17 +106,8 @@ export async function requestPasswordReset(_: FormState, fd: FormData): Promise<
     },
   });
 
-  const resetUrl = `${process.env.APP_URL}/reset-password?token=${token}`;
-  await mail.send({
-    to: user.email,
-    subject: 'Reset your password',
-    html: `
-      <p>Hi ${user.name},</p>
-      <p>Click the link below to reset your password. This link expires in 1 hour.</p>
-      <p><a href="${resetUrl}">Reset password</a></p>
-      <p>If you didn't request this, you can safely ignore this email.</p>
-    `,
-  });
+  // Use the existing mail.passwordReset function
+  await mail.passwordReset(user.email, token);
 
   return { error: undefined };
 }
